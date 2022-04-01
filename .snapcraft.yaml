@@ -1,0 +1,26 @@
+name: ix-analyze
+base: core20
+version: git
+grade: stable
+summary: Traffic analyzer for Internet Exchange users
+description: |-
+ Small command line tool which looks at traffic on a peering interface
+ and lines up the packet MAC addresses with IX peers.
+
+confinement: strict
+
+apps:
+  ix-analyze:
+    command: bin/ix-analyze
+    plugs:
+      - home
+      - network-control
+
+parts:
+  ix-analyze:
+    source: .
+    plugin: go
+    build-packages:
+      - libpcap-dev
+    stage-packages:
+      - libpcap0.8
