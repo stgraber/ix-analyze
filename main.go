@@ -77,6 +77,11 @@ func renderTable(traffic trafficCounter) {
 		})
 
 		for _, entry := range data {
+			// Ignore anything that's got less than 1MiB of traffic.
+			if entry.total < 1024*1024 {
+				continue
+			}
+
 			table.Append([]string{
 				entry.name,
 				units.GetByteSizeString(entry.rx, 2),
@@ -126,6 +131,8 @@ func run() error {
 			src := ether.SrcMAC.String()
 			if members[src] != "" {
 				src = members[src]
+			} else {
+				src = "UNKNOWN"
 			}
 			if traffic[src] == nil {
 				traffic[src] = &counter{name: src}
@@ -133,7 +140,9 @@ func run() error {
 
 			dst := ether.DstMAC.String()
 			if members[dst] != "" {
-				src = members[dst]
+				dst = members[dst]
+			} else {
+				dst = "UNKNOWN"
 			}
 			if traffic[dst] == nil {
 				traffic[dst] = &counter{name: dst}
