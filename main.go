@@ -114,6 +114,12 @@ func renderTable(traffic trafficCounter) {
 }
 
 func run() error {
+	// Usage.
+	if len(os.Args) != 3 {
+		fmt.Fprintf(os.Stderr, "Usage: %s <interface> <CSV file>\n", os.Args[0])
+		return nil
+	}
+
 	// Setup packet capture.
 	handle, err := pcap.OpenLive(os.Args[1], 65536, true, pcap.BlockForever)
 	if err != nil {
