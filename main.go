@@ -132,7 +132,7 @@ func run() error {
 			if members[src] != "" {
 				src = members[src]
 			} else {
-				src = "UNKNOWN"
+				src = fmt.Sprintf("UNKNOWN (%s)", src)
 			}
 			if traffic[src] == nil {
 				traffic[src] = &counter{name: src}
@@ -142,7 +142,7 @@ func run() error {
 			if members[dst] != "" {
 				dst = members[dst]
 			} else {
-				dst = "UNKNOWN"
+				dst = fmt.Sprintf("UNKNOWN (%s)", dst)
 			}
 			if traffic[dst] == nil {
 				traffic[dst] = &counter{name: dst}
