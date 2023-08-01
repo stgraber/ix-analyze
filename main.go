@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/canonical/lxd/shared/units"
@@ -23,9 +24,11 @@ func main() {
 }
 
 type counter struct {
-	name string
-	rx   int64
-	tx   int64
+	name  string
+	v4rx  int64
+	v4tx  int64
+	v6rx  int64
+	v6tx  int64
 	total int64
 }
 
@@ -81,7 +84,7 @@ func renderTable(traffic trafficCounter) {
 		fmt.Print("\033[H\033[2J")
 
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"PEER", "RX", "TX", "TOTAL"})
+		table.SetHeader([]string{"PEER", "IPV4 RX", "IPV4 TX", "IPV6 RX", "IPV6 TX", "TOTAL"})
 		table.SetBorder(false)
 		table.SetAutoWrapText(false)
 
@@ -98,8 +101,10 @@ func renderTable(traffic trafficCounter) {
 
 			table.Append([]string{
 				entry.name,
-				units.GetByteSizeString(entry.rx, 2),
-				units.GetByteSizeString(entry.tx, 2),
+				units.GetByteSizeString(entry.v4rx, 2),
+				units.GetByteSizeString(entry.v4tx, 2),
+				units.GetByteSizeString(entry.v6rx, 2),
+				units.GetByteSizeString(entry.v6tx, 2),
 				units.GetByteSizeString(entry.total, 2),
 			})
 		}
@@ -139,6 +144,8 @@ func run() error {
 		packet := gopacket.NewPacket(data, layers.LayerTypeEthernet, gopacket.NoCopy)
 		length := int64(len(packet.Data()))
 		layer := packet.Layer(layers.LayerTypeEthernet)
+
+		isIPv6 := packet.Layer(layers.LayerTypeIPv6)
 		if layer != nil {
 			ether := layer.(*layers.Ethernet)
 
@@ -166,9 +173,19 @@ func run() error {
 				traffic[dst] = &counter{name: dst}
 			}
 
-			traffic[src].rx += length
+			traffic[src].v4rx += length
+			if isIPv6 != nil {
+				traffic[src].v6rx += length
+			} else {
+				traffic[src].v4rx += length
+			}
 			traffic[src].total += length
-			traffic[dst].tx += length
+
+			if isIPv6 != nil {
+				traffic[dst].v6tx += length
+			} else {
+				traffic[dst].v4tx += length
+			}
 			traffic[dst].total += length
 		}
 	}
