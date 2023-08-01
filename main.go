@@ -40,6 +40,20 @@ func (tc trafficCounter) toSlice() []*counter {
 	return out
 }
 
+func isPrivateMAC(mac string) bool {
+	// Broadcast.
+	if mac == "ff:ff:ff:ff:ff:ff" {
+		return true
+	}
+
+	// IPv6 multicast.
+	if strings.HasPrefix(mac, "33:33:") {
+		return true
+	}
+
+	return false
+}
+
 func getMembers(fileName string) (map[string]string, error) {
 	f, err := os.Open(fileName)
 	if err != nil {
@@ -131,6 +145,8 @@ func run() error {
 			src := ether.SrcMAC.String()
 			if members[src] != "" {
 				src = members[src]
+			} else if isPrivateMAC(src) {
+				continue
 			} else {
 				src = fmt.Sprintf("UNKNOWN (%s)", src)
 			}
@@ -141,6 +157,8 @@ func run() error {
 			dst := ether.DstMAC.String()
 			if members[dst] != "" {
 				dst = members[dst]
+			} else if isPrivateMAC(dst) {
+				continue
 			} else {
 				dst = fmt.Sprintf("UNKNOWN (%s)", dst)
 			}
