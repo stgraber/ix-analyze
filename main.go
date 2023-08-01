@@ -7,11 +7,11 @@ import (
 	"sort"
 	"time"
 
-	"github.com/olekukonko/tablewriter"
+	"github.com/canonical/lxd/shared/units"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
-	"github.com/canonical/lxd/shared/units"
+	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
