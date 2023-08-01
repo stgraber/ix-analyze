@@ -1,5 +1,5 @@
 name: ix-analyze
-base: core20
+base: core22
 version: git
 grade: stable
 summary: Traffic analyzer for Internet Exchange users
@@ -24,3 +24,5 @@ parts:
       - libpcap-dev
     stage-packages:
       - libpcap0.8
+    build-snaps:
+      - go
