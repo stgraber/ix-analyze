@@ -2,15 +2,28 @@ package main
 
 import (
 	"encoding/csv"
-	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
 )
 
-var members map[string]string
-var overrides map[string]string
+type peer struct {
+	ASN             string
+	Label           string
+	Company         string
+	HWAddr          string
+	IPv4            string
+	IPv6            string
+	RouteServerIPv4 bool
+	RouteServerIPv6 bool
+	LinkSpeed       string
+	IRR             string
+	Note            string
+}
+
+var members map[string]*peer
+var overrides map[string]*peer
 
 func loadMembers(fileName string) error {
 	return loadFile(fileName, &members)
@@ -20,7 +33,7 @@ func loadOverrides(fileName string) error {
 	return loadFile(fileName, &overrides)
 }
 
-func loadFile(fileName string, target *map[string]string) error {
+func loadFile(fileName string, target *map[string]*peer) error {
 	// Parse the current file.
 	entries, err := parseFile(fileName)
 	if err != nil {
@@ -65,7 +78,7 @@ func loadFile(fileName string, target *map[string]string) error {
 	return nil
 }
 
-func parseFile(fileName string) (map[string]string, error) {
+func parseFile(fileName string) (map[string]*peer, error) {
 	f, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -78,9 +91,26 @@ func parseFile(fileName string) (map[string]string, error) {
 		return nil, err
 	}
 
-	entries := map[string]string{}
+	entries := map[string]*peer{}
 	for _, record := range records {
-		entries[record[3]] = fmt.Sprintf("%s (%s)", record[2], record[0])
+		entry := &peer{
+			ASN:             record[0],
+			Label:           record[1],
+			Company:         record[2],
+			HWAddr:          record[3],
+			IPv4:            record[4],
+			IPv6:            record[5],
+			RouteServerIPv4: record[6] == "Yes",
+			RouteServerIPv6: record[7] == "Yes",
+			LinkSpeed:       record[8],
+			IRR:             record[9],
+		}
+
+		if len(record) > 10 {
+			entry.Note = record[10]
+		}
+
+		entries[entry.HWAddr] = entry
 	}
 
 	return entries, nil
