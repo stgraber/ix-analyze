@@ -32,7 +32,9 @@ func renderTable(traffic trafficCounter) {
 			}
 
 			var name string
-			if members[entry.hwaddr] != "" {
+			if overrides[entry.hwaddr] != "" {
+				name = overrides[entry.hwaddr]
+			} else if members[entry.hwaddr] != "" {
 				name = members[entry.hwaddr]
 			} else {
 				name = fmt.Sprintf("UNKNOWN (%s)", entry.hwaddr)

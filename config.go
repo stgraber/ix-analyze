@@ -10,16 +10,25 @@ import (
 )
 
 var members map[string]string
+var overrides map[string]string
 
 func loadMembers(fileName string) error {
+	return loadFile(fileName, &members)
+}
+
+func loadOverrides(fileName string) error {
+	return loadFile(fileName, &overrides)
+}
+
+func loadFile(fileName string, target *map[string]string) error {
 	// Parse the current file.
-	entries, err := parseMembers(fileName)
+	entries, err := parseFile(fileName)
 	if err != nil {
 		return err
 	}
 
 	// Update the global data.
-	members = entries
+	*target = entries
 
 	// Setup watcher.
 	watcher, err := fsnotify.NewWatcher()
@@ -38,13 +47,13 @@ func loadMembers(fileName string) error {
 				continue
 			}
 
-			// Refresh the members list.
-			entries, err := parseMembers(fileName)
+			// Refresh the list.
+			entries, err := parseFile(fileName)
 			if err != nil {
 				continue
 			}
 
-			members = entries
+			*target = entries
 		}
 	}()
 
@@ -56,7 +65,7 @@ func loadMembers(fileName string) error {
 	return nil
 }
 
-func parseMembers(fileName string) (map[string]string, error) {
+func parseFile(fileName string) (map[string]string, error) {
 	f, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -69,10 +78,10 @@ func parseMembers(fileName string) (map[string]string, error) {
 		return nil, err
 	}
 
-	members := map[string]string{}
+	entries := map[string]string{}
 	for _, record := range records {
-		members[record[3]] = fmt.Sprintf("%s (%s)", record[2], record[0])
+		entries[record[3]] = fmt.Sprintf("%s (%s)", record[2], record[0])
 	}
 
-	return members, nil
+	return entries, nil
 }

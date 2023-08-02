@@ -34,8 +34,8 @@ func isPrivateMAC(mac string) bool {
 
 func run() error {
 	// Usage.
-	if len(os.Args) != 3 {
-		fmt.Fprintf(os.Stderr, "Usage: %s <interface> <CSV file>\n", os.Args[0])
+	if len(os.Args) < 3 {
+		fmt.Fprintf(os.Stderr, "Usage: %s <interface> <members CSV> [override CSV]\n", os.Args[0])
 		return nil
 	}
 
@@ -50,6 +50,13 @@ func run() error {
 	err = loadMembers(os.Args[2])
 	if err != nil {
 		return err
+	}
+
+	if len(os.Args) >= 4 {
+		err = loadOverrides(os.Args[3])
+		if err != nil {
+			return err
+		}
 	}
 
 	// Prepare counters.
