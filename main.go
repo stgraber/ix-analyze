@@ -24,6 +24,21 @@ func isPrivateMAC(mac string) bool {
 		return true
 	}
 
+	// Cisco CDP, VTP, SSTP.
+	if strings.HasPrefix(mac, "01:00:0c:") {
+		return true
+	}
+
+	// IPv4 multicast.
+	if strings.HasPrefix(mac, "01:00:5e:") {
+		return true
+	}
+
+	// Ethernet multicast.
+	if strings.HasPrefix(mac, "01:80:c2:") {
+		return true
+	}
+
 	// IPv6 multicast.
 	if strings.HasPrefix(mac, "33:33:") {
 		return true
